@@ -10,7 +10,6 @@ struct Node
 	Node *left;
 	Node *right;
 
-	Node();
 	Node(int _value);
 	Node(int _value, bool _color, Node *_parent, Node *_left, Node *_right);
 	~Node();
