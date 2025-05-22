@@ -1,5 +1,6 @@
 #include <iostream>
 #include <queue>
+#include <string>
 
 #include "RedBlackTree.h"
 
@@ -262,7 +263,7 @@ Node* findNodeWithValue(int value)
 	return current;
 }
 
-//Методы для вывода в консоль
+//Поиск высоты используя очередь
 int findHeight(Node* root) {
 	if (root == nullptr) 
 		return -1;
@@ -290,67 +291,30 @@ int findHeight(Node* root) {
 	return height;
 }
 
-void print(char c, int count)
+//Рекурсивный метод для вывода в консоль
+void printHelper(Node* root, string indent, bool last)
 {
-	for (int i = 0; i < count; i++)
-		cout << c;
-}
-
-void print(Node* node) {
-	if (node != nullptr) {
-		cout << (node->isRed ? 'R' : 'B') << '(' << node->value << ')';
-	}
-	else {
-		print(' ', 5);
-	}
-}
-
-void print(Node* root, int treeHeight) {
-	if (root == nullptr) 
-		return;
-
-	queue<Node*> q;
-	q.push(root);
-	int level = 0;
-	int nodesInLevel = 1;
-	bool isLevelEmpty = false;
-
-	int baseOffset = pow(2, treeHeight) * 5;
-
-	//Построчный вывод в консоль
-	while (level <= treeHeight && !isLevelEmpty) 
+	if (root != nullptr) 
 	{
-		print(' ', (baseOffset >> 1) - 2);
-
-		isLevelEmpty = true;
-		for (int i = 0; i < nodesInLevel; i++) 
+		cout << (indent);
+		if (last) 
 		{
-			Node* current = q.front();
-			q.pop();
-
-			if (current)
-			{
-				print(current);
-				q.push(current->left);
-				q.push(current->right);
-				if (current->left || current->right) 
-					isLevelEmpty = false;
-			}
-			else 
-			{
-				print(nullptr);
-				q.push(nullptr);
-				q.push(nullptr);
-			}
-			print(' ', baseOffset - 5);
+			cout << "R----";
+			indent += "   ";
+		}
+		else 
+		{
+			cout << "L----";
+			indent += "|  ";
 		}
 
-		cout << endl << endl;
-		level++;
-		nodesInLevel *= 2;
-		baseOffset /= 2;
+		cout << root->value << "(" << ((root->isRed) ? "RED" : "BLACK") << ")" << endl;
+
+		printHelper(root->left, indent, false);
+		printHelper(root->right, indent, true);
 	}
 }
+
 
 
 
@@ -459,14 +423,16 @@ bool RedBlackTree::contains(int value)
 }
 
 
-void RedBlackTree::printInfo() {
-	if (root == nullptr) {
-		cout << "Дерево пустое." << endl;
-	}
-	else {
+void RedBlackTree::printInfo()
+{
+
+	if (root == nullptr)
+		cout << "Tree is empty." << endl;
+	else 
+	{
 		cout << "Red-Black Tree:" << endl;
-		int h = findHeight(root);
-		print(root, h + 1);
+		cout << "Height :" << findHeight(root) << endl;
+		printHelper(root, "", true);
 	}
 }
 

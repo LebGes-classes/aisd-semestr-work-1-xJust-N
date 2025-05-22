@@ -9,7 +9,7 @@ int main()
 	srand(time(0));
 	RedBlackTree* rbt = new RedBlackTree();
 
-	int elementsCount = 3 + rand() % 10;
+	int elementsCount = 10 + rand() % 30;
 	int randomNumber;
 
 	for (int i = 0; i < elementsCount; i++)
