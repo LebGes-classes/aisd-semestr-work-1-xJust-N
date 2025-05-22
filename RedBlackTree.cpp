@@ -1,170 +1,293 @@
 #include <iostream>
-#include <vector>
+#include <queue>
+
 #include "RedBlackTree.h"
 
-using namespace std;
 
 Node* root;
 
-void fixRemove(Node *& _node)
+//Методы поворота для балансировки
+void rotateLeft(Node *& node)
 {
-}
+	Node* child = node->right;
 
-void rotateLeft(Node *& _node)
-{
-	Node* _child = _node->right;
+	node->right = child->left;
+	child->left = node;
 
-	_node->right = _child->left;
-	_child->left = _node;
-
-	if (_node->right != nullptr)
-		_node->right->parent = _node;
+	if (node->right != nullptr)
+		node->right->parent = node;
 
 	//Обновление ссылок для родителей
-	if (_node->parent == nullptr)
-		root = _child;
-	else if (_node == _child->parent->left)
-		_node->parent->left = _child;
+	if (node->parent == nullptr)
+		root = child;
+	else if (node == child->parent->left)
+		node->parent->left = child;
 	else 
-		_node->parent->right = _child;
+		node->parent->right = child;
 
-	_child->parent = _node->parent;
-	_node->parent = _child;
+	child->parent = node->parent;
+	node->parent = child;
 }
 
-void rotateRight(Node *& _node)
+void rotateRight(Node *& node)
 {
-	Node* _child = _node->left;
+	Node* child = node->left;
 
-	_node->left = _child->right;
-	_child->right = _node;
+	node->left = child->right;
+	child->right = node;
 
-	if (_node->left != nullptr)
-		_node->left->parent = _node;
+	if (node->left != nullptr)
+		node->left->parent = node;
 
 	//Обновление ссылок для родителей
-	if (_node->parent == nullptr)
-		root = _child;
-	else if (_node == _child->parent->left)
-		_node->parent->left = _child;
+	if (node->parent == nullptr)
+		root = child;
+	else if (node == child->parent->left)
+		node->parent->left = child;
 	else
-		_node->parent->right = _child;
+		node->parent->right = child;
 
-	_child->parent = _node->parent;
-	_node->parent = _child;
+	child->parent = node->parent;
+	node->parent = child;
 }
 
-void colorSwap(Node*& _parent) {
-	//Свап цветов - при двух красных потомках родитель становится красным
+//Свап цветов - при двух красных потомках родитель становится красным
+void colorSwap(Node*& parent) {
 
-	Node* _left = _parent->left;
-	Node* _right = _parent->right;
 
-	if (_parent != nullptr && left != nullptr && _right != nullptr &&
-		_left->isRed && _right->isRed && _parent != root)
+	Node* left = parent->left;
+	Node* right = parent->right;
+
+	if (parent != nullptr && left != nullptr && right != nullptr &&
+		left->isRed && right->isRed && parent != root)
 	{
-		_left->isRed = false;
-		_right->isRed = false;
-		_parent->isRed = true;
+		left->isRed = false;
+		right->isRed = false;
+		parent->isRed = true;
 	}
 }
 
-void fixAdd(Node*& _currentNode)
+//Метод для устранения нарушения баланса
+void fixAdd(Node*& currentNode)
 {
-	Node* _node = _currentNode;
-	Node* _parent = nullptr;
-	Node* _grandparent = nullptr;
+	Node* node = currentNode;
+	Node* parent = nullptr;
+	Node* grandparent = nullptr;
 	//балансировка нужна тогда и только тогда если два идущих подряд узла - красные
-	while (_node != root && _node->isRed
-		&& _node->parent->isRed) {
-		_parent = _node->parent;
-		_grandparent = _parent->parent;
-		if (_parent == _grandparent->left)
+	while (node != root && node->isRed
+		&& node->parent->isRed) {
+		parent = node->parent;
+		grandparent = parent->parent;
+		if (grandparent != nullptr && parent == grandparent->left)
 		{
-			Node* _uncle = _grandparent->right;
+			Node* uncle = grandparent->right;
 
 			//Родитель и дядя красные - свап цветов
-			if (_uncle != nullptr
-				&& _uncle->isRed)
+			if (uncle != nullptr
+				&& uncle->isRed)
 			{
-				colorSwap(_grandparent);
-				_node = _grandparent;
+				colorSwap(grandparent);
+				node = grandparent;
 			}
 			else
 			{
 				//Родитель левый и его ребенок справа
-				if (_node == _parent->right)
+				if (node == parent->right)
 				{
-					rotateLeft(_parent);
-					_node = _parent;
-					_parent = _node->parent;
+					rotateLeft(parent);
+					node = parent;
+					parent = node->parent;
 				}
 				//Родитель левый и его ребенок слева
-				rotateRight(_grandparent);
+				rotateRight(grandparent);
 
-				swap(_parent->isRed, _grandparent->isRed);
-				_node = _parent;
+				swap(parent->isRed, grandparent->isRed);
+				node = parent;
 			}
 		}
-		else {
-			Node* _uncle = _grandparent->left;
+		else if(grandparent != nullptr)
+		{
+			Node* uncle = grandparent->left;
 			//Родитель и дядя красные - свап цветов
-			if (_uncle != nullptr
-				&& _uncle->isRed) {
-				colorSwap(_grandparent);
-				_node = _grandparent;
+			if (uncle != nullptr
+				&& uncle->isRed) {
+				colorSwap(grandparent);
+				node = grandparent;
 			}
 			else {
 				//Родитель правый и его ребенок слева
-				if (_node == _parent->left) {
-					rotateRight(_parent);
-					_node = _parent;
-					_parent = _node->parent;
+				if (node == parent->left) {
+					rotateRight(parent);
+					node = parent;
+					parent = node->parent;
 				}
 				//Родитель правый и его ребенок справа
-				rotateLeft(_grandparent);
-				swap(_parent->isRed, _grandparent->isRed);
-				_node = _parent;
+				rotateLeft(grandparent);
+				swap(parent->isRed, grandparent->isRed);
+				node = parent;
 			}
 		}
 	}
 	root->isRed = false;
 }
 
-void fixRemove(Node*& _node)
+//Вспомогательные методы для удаления
+void transplant(Node*& root, Node*& u, Node*& v)
 {
-
+	if (u->parent == nullptr)
+		root = v;
+	else if (u == u->parent->left)
+		u->parent->left = v;
+	else
+		u->parent->right = v;
+	if (v != nullptr)
+		v->parent = u->parent;
 }
 
-Node* findNodeWithValue(int _value)
+Node* minValueNode(Node*& node)
 {
-	Node* _current = root;
-	bool _flag = true;
-	while (_flag && _current != nullptr) 
+	Node* current = node;
+	while (current->left != nullptr)
+		current = current->left;
+
+	return current;
+}
+
+void fixRemove(Node*& node)
+{
+	while (node != root && node->isRed == false) 
 	{
-		if (_current->value == _value)
-			_flag = false;
-		else if (_current->value < _value)
-			_current = _current->left;
-		else
-			_current = _current->right;
-	}
+		if (node == node->parent->left) 
+		{
+			Node* sibling = node->parent->right;
+			if (sibling->isRed) 
+			{
+				sibling->isRed = false;
+				node->parent->isRed = true;
+				rotateLeft(node->parent);
+				sibling = node->parent->right;
+			}
+			if ((sibling->left == nullptr || sibling->left->isRed == false) && (sibling->right == nullptr || sibling->right->isRed == false)) 
+			{
+				sibling->isRed = true;
+				node = node->parent;
+			}
+			else
+			{
+				if (sibling->right == nullptr || sibling->right->isRed == false) 
+				{				
+					if (sibling->left != nullptr)
+						sibling->left->isRed = false;
 
-	return _current;
+					sibling->isRed = true;
+					rotateRight(sibling);
+					sibling = node->parent->right;
+				}
+				sibling->isRed = node->parent->isRed;
+				node->parent->isRed = false;
+				if (sibling->right != nullptr)
+					sibling->right->isRed = false;
+
+				rotateLeft(node->parent);
+				node = root;
+			}
+		}
+		else 
+		{
+			Node* sibling = node->parent->left;
+
+			if (sibling->isRed) 
+			{
+				sibling->isRed = false;
+				node->parent->isRed = true;
+				rotateRight(node->parent);
+				sibling = node->parent->left;
+			}
+			if ((sibling->left == nullptr || sibling->left->isRed == false) && (sibling->right == nullptr || sibling->right->isRed == false)) 
+			{
+				sibling->isRed = true;
+				node = node->parent;
+			}
+			else 
+			{
+				if (sibling->left == nullptr || sibling->left->isRed == false)
+				{
+					if (sibling->right != nullptr)
+						sibling->right->isRed = false;
+
+					sibling->isRed = true;
+					rotateLeft(sibling);
+					sibling = node->parent->left;
+				}
+				sibling->isRed = node->parent->isRed;
+				node->parent->isRed = false;
+				if (sibling->left != nullptr)
+					sibling->left->isRed = false;
+
+				rotateRight(node->parent);
+				node = root;
+			}
+		}
+	}
+	node->isRed = false;
 }
 
-int findHeight(Node* root) {
-	if (root == nullptr) {
-		return -1;
+//Рекурсивно удаляет узлы
+void deleteTree(Node*& node)
+{
+	if (node != nullptr)
+	{
+		deleteTree(node->left);
+		deleteTree(node->right);
+		delete node;
+	}
+}
+
+
+//Универсальный метод для поиска
+Node* findNodeWithValue(int value)
+{
+	Node* current = root;
+	bool flag = true;
+	while (flag && current != nullptr) 
+	{
+		if (current->value == value)
+			flag = false;
+		else if (current->value < value)
+			current = current->left;
+		else
+			current = current->right;
 	}
 
-	int leftHeight = findHeight(root->left);
-	int rightHeight = findHeight(root->right);
+	return current;
+}
 
-	if (leftHeight > rightHeight)
-		return leftHeight + 1;
+//Методы для вывода в консоль
+int findHeight(Node* root) {
+	if (root == nullptr) 
+		return -1;
 
-	return rightHeight + 1;
+	queue<Node*> q;
+	q.push(root);
+	int height = -1;
+
+	while (!q.empty()) 
+	{
+		int levelSize = q.size();
+		height++;
+
+		for (int i = 0; i < levelSize; i++) 
+		{
+			Node* current = q.front();
+			q.pop();
+
+			if (current->left != nullptr)
+				q.push(current->left);
+			if (current->right != nullptr)
+				q.push(current->right);
+		}
+	}
+	return height;
 }
 
 void print(char c, int count)
@@ -173,54 +296,64 @@ void print(char c, int count)
 		cout << c;
 }
 
-void print(Node*& _node)
-{
-	if (_node != nullptr)
-		cout << (_node->isRed) ? 'R' : 'B' << '(' << _node->value << ')';
-	else
+void print(Node* node) {
+	if (node != nullptr) {
+		cout << (node->isRed ? 'R' : 'B') << '(' << node->value << ')';
+	}
+	else {
 		print(' ', 5);
+	}
 }
 
-void print(Node*& _node, int _height)
-{
-	vector<Node*> _v;
-	_v.push_back(_node);
-	int _emptyLine = _height * 5;
+void print(Node* root, int treeHeight) {
+	if (root == nullptr) 
+		return;
 
-	//Цикл для вывода
-	for (int i = 0; i < _height; i++)
+	queue<Node*> q;
+	q.push(root);
+	int level = 0;
+	int nodesInLevel = 1;
+	bool isLevelEmpty = false;
+
+	int baseOffset = pow(2, treeHeight) * 5;
+
+	//Построчный вывод в консоль
+	while (level <= treeHeight && !isLevelEmpty) 
 	{
-		print(' ', _emptyLine);
-		for (int j = 0; j < pow(2, i); j++)
+		print(' ', (baseOffset >> 1) - 2);
+
+		isLevelEmpty = true;
+		for (int i = 0; i < nodesInLevel; i++) 
 		{
-			Node* _node = _v.pop_back;
+			Node* current = q.front();
+			q.pop();
 
-			print(_node);
-
-			if (_node != nullptr)
+			if (current)
 			{
-				_v.insert(_v.begin, _node->left);
-				_v.insert(_v.begin, _node->right);
+				print(current);
+				q.push(current->left);
+				q.push(current->right);
+				if (current->left || current->right) 
+					isLevelEmpty = false;
 			}
+			else 
+			{
+				print(nullptr);
+				q.push(nullptr);
+				q.push(nullptr);
+			}
+			print(' ', baseOffset - 5);
 		}
-		cout << endl;
-		_emptyLine -= 5;
 
-	}
-	_v.clear;
-	delete &_v;
-}
-
-//Рекурсивно удаляет узлы
-void deleteTree(Node*& _node)
-{
-	if (_node != nullptr)
-	{
-		deleteTree(_node->left);
-		deleteTree(_node->right);
-		delete _node;
+		cout << endl << endl;
+		level++;
+		nodesInLevel *= 2;
+		baseOffset /= 2;
 	}
 }
+
+
+
 
 
 
@@ -230,61 +363,110 @@ RedBlackTree::RedBlackTree()
 	root = nullptr;
 }
 
-void RedBlackTree::add(int _value)
+void RedBlackTree::add(int value)
 {
-	Node* _current = root;
-	Node* _node = new Node(_value);
-	Node* _parent = nullptr;
-
-	while (_current != nullptr) 
-	{
-		_parent = _current;
-		if (_parent->value < _node->value) 
-		{
-			_current = _parent->left;
-		}
-		else 
-		{
-			_current = _parent->right;
-		}
-
+	Node* node = new Node(value);
+	Node* parent = nullptr;
+	Node* current = root;
+	
+	//Поиск нужного листа
+	while (current != nullptr) {
+		parent = current;
+		if (node->value < current->value)
+			current = current->left;
+		else
+			current = current->right;
 	}
+	node->parent = parent;
 
-	if (_parent == nullptr)
+	//Привязка к родителям:
+	if (parent == nullptr)
 	{
-		root = _node;
+		root = node;
+		fixAdd(node);
 	}
-
-	else if(_parent->value < _node->value) 
+	else if (node->value < parent->value)
 	{
-		_parent->left = _node;
+		parent->left = node;
 	}
 	else
 	{
-		_parent->right = _node;
+		parent->right = node;
+		fixAdd(node);
 	}
-	
-	fixAdd(_node);
-}
-
-void RedBlackTree::remove(int _value)
-{
-
-}
-
-bool RedBlackTree::contains(int _value)
-{
-	return findNodeWithValue(_value) != nullptr;
 }
 
 
-void RedBlackTree::printInfo()
+
+void RedBlackTree::remove(int value)
 {
-	if (root == nullptr)
-		cout << "Tree is empty." << endl;
+	Node* nodeToDelete = findNodeWithValue(value);
+
+	if (nodeToDelete == nullptr)
+	{
+		cout << "Элемент не найден" << endl;
+		return;
+	}
+
+	Node* x = nullptr;
+	Node* y = nullptr;
+
+
+	y = nodeToDelete;
+	bool yIsRed = y->isRed;
+	if (nodeToDelete->left == nullptr) 
+	{
+		x = nodeToDelete->right;
+		transplant(root, nodeToDelete, nodeToDelete->right);
+	}
+	else if (nodeToDelete->right == nullptr) 
+	{
+		x = nodeToDelete->left;
+		transplant(root, nodeToDelete, nodeToDelete->left);
+	}
+	else 
+	{
+		y = minValueNode(nodeToDelete->right);
+		yIsRed = y->isRed;
+		x = y->right;
+		if (y->parent == nodeToDelete) 
+		{
+			if (x != nullptr)
+				x->parent = y;
+		}
+		else 
+		{
+			transplant(root, y, y->right);
+			y->right = nodeToDelete->right;
+			y->right->parent = y;
+		}
+		transplant(root, nodeToDelete, y);
+		y->left = nodeToDelete->left;
+		y->left->parent = y;
+		y->isRed = nodeToDelete->isRed;
+	}
+	delete nodeToDelete;
+	if (yIsRed == false) 
+	{
+		fixRemove(x);
+	}
+}
+
+
+bool RedBlackTree::contains(int value)
+{
+	return findNodeWithValue(value) != nullptr;
+}
+
+
+void RedBlackTree::printInfo() {
+	if (root == nullptr) {
+		cout << "Дерево пустое." << endl;
+	}
 	else {
 		cout << "Red-Black Tree:" << endl;
-		print(root, findHeight(root));
+		int h = findHeight(root);
+		print(root, h + 1);
 	}
 }
 

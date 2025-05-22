@@ -4,8 +4,9 @@ using namespace std;
 
 struct Node
 {
+public:
 	int value;
-	bool isRed;	//÷вет дл€ красно-черного дерева, true - черный, false - красный
+	bool isRed;	//÷вет дл€ красно-черного дерева, true - красный, false - черный
 	Node *parent;
 	Node *left;
 	Node *right;

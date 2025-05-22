@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="Node.cpp" />
     <ClCompile Include="RedBlackTree.cpp" />
+    <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Node.h" />

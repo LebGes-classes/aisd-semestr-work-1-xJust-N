@@ -4,7 +4,6 @@
 
 class RedBlackTree
 {
-	Node *root;
 
 public:
 	RedBlackTree();
