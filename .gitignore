@@ -2,3 +2,4 @@
 ~$асно-Черное-Дерево.docx
 *.tmp
 *.tlog
+/RedBlackTree/.vs

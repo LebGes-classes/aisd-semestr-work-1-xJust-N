@@ -1,3 +1,0 @@
-﻿  RedBlackTree.cpp
-LINK : warning LNK4075: не учитывается "/INCREMENTAL" из-за спецификации "/OPT:ICF"
-  semestr-work.vcxproj -> D:\st\prog\projects\aisd-semestr-work-1-xJust-N\Release\semestr-work.exe
